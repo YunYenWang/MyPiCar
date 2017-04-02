@@ -13,6 +13,7 @@ import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 import com.cht.iot.util.JsonUtils;
@@ -20,22 +21,30 @@ import com.pi4j.wiringpi.Gpio;
 import com.pi4j.wiringpi.SoftPwm;
 
 @Service
+@ConfigurationProperties(prefix = "car")
 public class MyPiCarServer {
 	static final Logger LOG = LoggerFactory.getLogger(MyPiCarServer.class);
+	
+	static final int PWM_MAX = 100;
 	
 	DatagramSocket socket;
 	int port = 10000;
 	
-	int westForwardPin = 0;		// pin 11
-	int westBackwardPin = 1;	// pin 12
-	int eastForwardPin = 3;		// pin 15
-	int eastBackwardPin = 4;	// pin 16
+	int westForwardPin	= 0;	// pin 11
+	int westBackwardPin	= 1;	// pin 12
+	int eastForwardPin	= 3;	// pin 15
+	int eastBackwardPin	= 4;	// pin 16
 	
 	ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 	
 	int seq = 0;
+	Control last;
 	
 	public MyPiCarServer() throws Exception {
+	}
+	
+	public void setPort(int port) {
+		this.port = port;
 	}
 	
 	@PostConstruct
@@ -46,10 +55,10 @@ public class MyPiCarServer {
 		
 		Gpio.wiringPiSetup();
 		
-		SoftPwm.softPwmCreate(westForwardPin, 0, 100);
-		SoftPwm.softPwmCreate(westBackwardPin, 0, 100);
-		SoftPwm.softPwmCreate(eastForwardPin, 0, 100);
-		SoftPwm.softPwmCreate(eastBackwardPin, 0, 100);
+		SoftPwm.softPwmCreate(westForwardPin, 0, PWM_MAX);
+		SoftPwm.softPwmCreate(westBackwardPin, 0, PWM_MAX);
+		SoftPwm.softPwmCreate(eastForwardPin, 0, PWM_MAX);
+		SoftPwm.softPwmCreate(eastBackwardPin, 0, PWM_MAX);
 		
 		pause();
 		
@@ -83,17 +92,21 @@ public class MyPiCarServer {
 	
 	void exec(Control ctrl) {
 		if (ctrl.west > 0) {
-			SoftPwm.softPwmWrite(westForwardPin, ctrl.west);
+			int pwm = Math.min(ctrl.west, PWM_MAX);			
+			SoftPwm.softPwmWrite(westForwardPin, pwm);
 			
 		} else if (ctrl.west < 0) {
-			SoftPwm.softPwmWrite(westBackwardPin, Math.abs(ctrl.west));			
+			int pwm = Math.min(Math.abs(ctrl.west), PWM_MAX);
+			SoftPwm.softPwmWrite(westBackwardPin, pwm);			
 		}
 		
 		if (ctrl.east > 0) {
-			SoftPwm.softPwmWrite(eastForwardPin, ctrl.east);
+			int pwm = Math.min(ctrl.east, PWM_MAX);
+			SoftPwm.softPwmWrite(eastForwardPin, pwm);
 			
 		} else if (ctrl.east < 0) {
-			SoftPwm.softPwmWrite(eastBackwardPin, Math.abs(ctrl.east));			
+			int pwm = Math.min(Math.abs(ctrl.east), PWM_MAX);
+			SoftPwm.softPwmWrite(eastBackwardPin, pwm);			
 		}
 	}
 	
@@ -112,11 +125,15 @@ public class MyPiCarServer {
 					
 					ctrl.seq = newSeq();
 					
-					pause();
+					if (!ctrl.equals(last)) { // don't pause for duplicated control					
+						pause();
 					
-					LOG.info("Control - {}", json);
+						LOG.info("Control - {}", json);
 					
-					exec(ctrl);
+						exec(ctrl);
+					}
+					
+					last = ctrl;
 					
 					// stop process after required duration
 					scheduler.schedule(new Runnable() {

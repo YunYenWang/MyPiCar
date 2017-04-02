@@ -13,9 +13,11 @@ import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConfigurationProperties(prefix = "heartbeat")
 public class HeartbeatService {
 	static final Logger LOG = LoggerFactory.getLogger(HeartbeatService.class);
 	
@@ -31,6 +33,14 @@ public class HeartbeatService {
 	ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 	
 	public HeartbeatService() throws Exception {
+	}
+	
+	public void setPort(int port) {
+		this.port = port;
+	}
+	
+	public void setPeriod(long period) {
+		this.period = period;
 	}
 	
 	@PostConstruct

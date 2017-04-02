@@ -13,9 +13,11 @@ import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConfigurationProperties(prefix = "camera")
 public class PiCameraServer {
 	static final Logger LOG = LoggerFactory.getLogger(PiCamera.class);
 	
@@ -29,6 +31,22 @@ public class PiCameraServer {
 	int port = 20000;
 
 	public PiCameraServer() {
+	}
+	
+	public void setWidth(int width) {
+		this.width = width;
+	}
+	
+	public void setHeight(int height) {
+		this.height = height;
+	}
+	
+	public void setQuality(int quality) {
+		this.quality = quality;
+	}
+	
+	public void setPort(int port) {
+		this.port = port;
 	}
 	
 	@PostConstruct

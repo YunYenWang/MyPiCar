@@ -1,0 +1,12 @@
+heartbeat:
+  port: 60000
+  period: 2000
+
+car:
+  port: 10000
+
+camera:
+  port: 20000
+  width: 800
+  height: 480
+  quality: 80
