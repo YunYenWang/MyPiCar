@@ -37,6 +37,8 @@ public class PiCamera {
 		device = new VideoDevice(dev);
 		grabber = device.getJPEGFrameGrabber(w, h, input, standard, q);
 		
+        LOG.info("Frame rate: {}", grabber.getFrameInterval());
+		
 		grabber.setCaptureCallback(new CaptureCallback() {
 			@Override
 			public void nextFrame(VideoFrame frame) {
@@ -82,9 +84,9 @@ public class PiCamera {
 	
 //	public static void main(String[] args) throws Exception {
 //		String dev = "/dev/video0";
-//		int w = 800;
+//		int w = 640;
 //		int h = 480;
-//		int q = 80;
+//		int q = 100;
 //		
 //		PiCamera pc = new PiCamera(dev, w, h, q);
 //		try {		
@@ -96,16 +98,13 @@ public class PiCamera {
 //				
 //				LOG.info("Snapshot size is {}", snapshot.length);
 //			}
-//			LOG.info("elapse: {} ms", System.currentTimeMillis() - ctm);
+//			LOG.info("elapse: {} ms/frame", (System.currentTimeMillis() - ctm) / 10);
 //			
-//			java.io.FileOutputStream fos = new java.io.FileOutputStream("/tmp/test.jpg");
-//			try {
-//				fos.write(snapshot);
-//				fos.flush();
-//				
-//			} finally {
-//				fos.close();
-//			}
+//			java.io.FileOutputStream fos = new java.io.FileOutputStream("/tmp/test.rgb");
+//			fos.write(snapshot);
+//			fos.flush();
+//			fos.close();
+//					
 //			
 //		} finally {
 //			pc.close();
