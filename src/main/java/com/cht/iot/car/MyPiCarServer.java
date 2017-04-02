@@ -88,6 +88,8 @@ public class MyPiCarServer {
 		SoftPwm.softPwmWrite(westBackwardPin, 0);
 		SoftPwm.softPwmWrite(eastForwardPin, 0);
 		SoftPwm.softPwmWrite(eastBackwardPin, 0);
+		
+		last = null;
 	}
 	
 	void exec(Control ctrl) {

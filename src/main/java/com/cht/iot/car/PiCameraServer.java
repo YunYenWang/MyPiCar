@@ -23,9 +23,9 @@ public class PiCameraServer {
 	
 	PiCamera camera;
 	String dev = "/dev/video0";
-	int width = 800;
+	int width = 640;
 	int height = 480;
-	int quality = 80;
+	int quality = 100;
 	
 	ServerSocket server;
 	int port = 20000;
@@ -76,7 +76,7 @@ public class PiCameraServer {
 			for (;;) {
 				Socket sck = server.accept();
 				
-				LOG.info("Connection from {}:{}", sck.getInetAddress().getHostAddress(), sck.getPort());
+				LOG.info("Connection is from {}:{}", sck.getInetAddress().getHostAddress(), sck.getPort());
 				
 				try {
 					try {
